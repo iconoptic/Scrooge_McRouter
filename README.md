@@ -9,13 +9,13 @@ Scrooge McRouter is a Copilot Chat participant that turns your "ask the smart mo
 ## How it works
 
 ```
-You ────► @router ──► Launchpad scouts the repo ──► Treasure Map (≤78k chars)
+You ────► @scrooge ──► Launchpad scouts the repo ──► Treasure Map (≤78k chars)
                                                           │
                                                           ▼
                               You paste the Map into Scrooge (web chat)
                                                           │
                                                           ▼
-You paste Scrooge's reply ──► @router ──► Launchpad applies edits ──► Deposit / Bounce
+You paste Scrooge's reply ──► @scrooge ──► Launchpad applies edits ──► Deposit / Bounce
 ```
 
 - **Treasure Map** — a self-contained briefing with the user's request, repo tree, file slices, scout findings, and any "Previously Attempted" context from earlier turns.
@@ -26,7 +26,7 @@ You paste Scrooge's reply ──► @router ──► Launchpad applies edits �
 
 ## Modes
 
-`@router` self-routes every request through Haiku (a tiny LM call) into one of four modes:
+`@scrooge` self-routes every request through Haiku (a tiny LM call) into one of four modes:
 
 | Mode | When it fires | What happens |
 |---|---|---|
@@ -74,7 +74,7 @@ You have two ways to run it:
 
 ### Option A — install into your real VS Code (recommended for daily use)
 
-This packages the extension as a `.vsix` and installs it into your normal VS Code, so `@router` shows up in regular Copilot Chat — no Extension Development Host needed.
+This packages the extension as a `.vsix` and installs it into your normal VS Code, so `@scrooge` shows up in regular Copilot Chat — no Extension Development Host needed.
 
 One-time setup:
 
@@ -90,7 +90,7 @@ npx tsc -p ./ \
   && code --install-extension scrooge-mcrouter.vsix --force
 ```
 
-Then reload your VS Code window (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and `@router` is live.
+Then reload your VS Code window (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and `@scrooge` is live.
 
 To uninstall: `code --uninstall-extension scrooge-mcrouter.scrooge-mcrouter`.
 

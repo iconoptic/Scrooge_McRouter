@@ -4,7 +4,7 @@ import { parseCommanderText } from './applyEdits';
 /**
  * Phase A — Routing brain.
  *
- * Given the user's prompt, decide what `@router` should do:
+ * Given the user's prompt, decide what `@scrooge` should do:
  *
  *   - ANSWER               → reply directly with text. Greetings, conceptual Qs.
  *   - IMPLEMENT            → small/clear coding task. Haiku reads files,
@@ -132,7 +132,7 @@ export function isPureEditsPaste(text: string): boolean {
 // ---------------------------------------------------------------------------
 
 const ROUTER_SYSTEM_PROMPT = [
-    'You are the routing brain of @router (Scrooge McRouter), a VS Code chat',
+    'You are the routing brain of @scrooge (Scrooge McRouter), a VS Code chat',
     'participant. For every user turn you classify what should happen next.',
     '',
     'Pick exactly one mode:',

@@ -22,8 +22,8 @@
   "contributes": {
     "chatParticipants": [
       {
-        "id": "scrooge-mcrouter.router",
-        "name": "router",
+        "id": "scrooge-mcrouter.scrooge",
+        "name": "scrooge",
         "fullName": "Scrooge McRouter",
         "description": "Dispatches Launchpad to scout your codebase and packages a Treasure Map for the boss.",
         "isSticky": true,

@@ -22,7 +22,7 @@ const PARTICIPANT_ID = 'scrooge-mcrouter.router';
 // ---------------------------------------------------------------------------
 
 /**
- * Convert prior @router turns from the chat context into LM messages so each
+ * Convert prior @scrooge turns from the chat context into LM messages so each
  * new turn sees the conversation so far (deposit outcomes, prior briefings,
  * Scrooge's prose pastes, etc.). Caps at the last `maxTurns` exchanges to
  * keep the prompt budget under control.

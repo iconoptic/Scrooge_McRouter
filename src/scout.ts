@@ -669,7 +669,7 @@ export function composeBriefing(inputs: BriefingInputs): string {
         'inside VS Code. The user will paste this entire prompt into a separate',
         '"Scrooge" session (e.g. claude.ai or copilot.microsoft.com) and follow',
         'up with their actual instructions. They will then paste your reply',
-        'back into the `@router` chat participant; Launchpad will read your',
+        'back into the `@scrooge` chat participant; Launchpad will read your',
         'response and apply the resulting edits to the workspace.'
     ].join('\n');
 
@@ -779,7 +779,7 @@ export async function handleAnswer(
 ): Promise<void> {
     const messages: vscode.LanguageModelChatMessage[] = [
         vscode.LanguageModelChatMessage.User(
-            'You are @router (Scrooge McRouter), a concise coding assistant in VS Code. ' +
+            'You are @scrooge (Scrooge McRouter), a concise coding assistant in VS Code. ' +
             'Answer briefly. If the user actually needs codebase context, suggest they ' +
             'rephrase or use /dispatch to send Launchpad on a scouting run.'
         ),
@@ -840,7 +840,7 @@ export async function handleEscalate(
         `${scout.toolsUsed.length} tool${scout.toolsUsed.length === 1 ? '' : 's'} deployed, ` +
         `${briefing.length} chars (budget ${TREASURE_MAP_BUDGET}).\n\n` +
         'Copy the Treasure Map below into Scrooge (claude.ai / copilot.microsoft.com), ' +
-        'then add your follow-up. Paste Scrooge\'s reply back into `@router` and ' +
+        'then add your follow-up. Paste Scrooge\'s reply back into `@scrooge` and ' +
         'Launchpad will translate it into edits — no slash command needed.\n\n'
     );
     stream.markdown('````markdown\n' + briefing + '\n````\n');
