@@ -15,7 +15,7 @@ import {
 import { applyCommanderPaste, renderApplyOutcome } from './applyEdits';
 import { registerSnapshotProvider } from './snapshots';
 
-const PARTICIPANT_ID = 'scrooge-mcrouter.router';
+const PARTICIPANT_ID = 'scrooge-mcrouter.scrooge-mcrouter';
 
 // ---------------------------------------------------------------------------
 // Conversation history

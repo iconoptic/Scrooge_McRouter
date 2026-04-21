@@ -22,7 +22,7 @@
   "contributes": {
     "chatParticipants": [
       {
-        "id": "scrooge-mcrouter.scrooge",
+        "id": "scrooge-mcrouter.scrooge-mcrouter",
         "name": "scrooge",
         "fullName": "Scrooge McRouter",
         "description": "Dispatches Launchpad to scout your codebase and packages a Treasure Map for the boss.",
