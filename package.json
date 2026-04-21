@@ -1,0 +1,79 @@
+{
+  "name": "scrooge-mcrouter",
+  "displayName": "Scrooge McRouter",
+  "description": "Scrooge McRouter dispatches Launchpad to scout your workspace and packages a Treasure Map for a heavier model on the web.",
+  "version": "0.0.1",
+  "publisher": "scrooge-mcrouter",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Other"
+  ],
+  "activationEvents": [
+    "onChatParticipant:scrooge-mcrouter.router"
+  ],
+  "main": "./dist/extension.js",
+  "extensionDependencies": [
+    "github.copilot-chat"
+  ],
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "scrooge-mcrouter.router",
+        "name": "router",
+        "fullName": "Scrooge McRouter",
+        "description": "Dispatches Launchpad to scout your codebase and packages a Treasure Map for the boss.",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "dispatch",
+            "description": "Force a scouting run and a Treasure Map (skip routing)."
+          },
+          {
+            "name": "implement",
+            "description": "Force Launchpad to implement directly (skip routing)."
+          },
+          {
+            "name": "penny",
+            "description": "Force a direct text answer — penny's worth of work (skip routing)."
+          },
+          {
+            "name": "deposit",
+            "description": "Pure-local apply: parse pasted SEARCH/REPLACE text into the vault (no LM call)."
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "Scrooge McRouter",
+      "properties": {
+        "scroogeMcRouter.autoSaveAfterDeposit": {
+          "type": "boolean",
+          "default": true,
+          "description": "After applying any deposit (manual /deposit, auto-detected paste, or model-emitted edits), save touched files to disk automatically. Disable to leave files dirty for manual review."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "TS_NODE_PROJECT=tsconfig.test.json mocha"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^20.x",
+    "@types/sinon": "^17.0.3",
+    "@types/vscode": "^1.95.0",
+    "chai": "^4.4.1",
+    "mocha": "^10.7.0",
+    "sinon": "^18.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "npx tsc -p ./",
+      "problemMatcher": ["$tsc"],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "watch",
+      "type": "shell",
+      "command": "npx tsc -watch -p ./",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "group": "build"
+    }
+  ]
+}
