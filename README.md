@@ -70,14 +70,42 @@ npm install
 npx tsc -p ./
 ```
 
-Then press `F5` in VS Code to launch an Extension Development Host, or package with `vsce package`.
+You have two ways to run it:
+
+### Option A — install into your real VS Code (recommended for daily use)
+
+This packages the extension as a `.vsix` and installs it into your normal VS Code, so `@router` shows up in regular Copilot Chat — no Extension Development Host needed.
+
+One-time setup:
+
+```bash
+npm install -g @vscode/vsce          # or use `npx @vscode/vsce` below
+```
+
+Build, package, and install:
+
+```bash
+npx tsc -p ./ \
+  && npx @vscode/vsce package --allow-missing-repository -o scrooge-mcrouter.vsix \
+  && code --install-extension scrooge-mcrouter.vsix --force
+```
+
+Then reload your VS Code window (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and `@router` is live.
+
+To uninstall: `code --uninstall-extension scrooge-mcrouter.scrooge-mcrouter`.
+
+> `vsce package` may warn about a missing `repository`, `LICENSE`, `icon`, or `.vscodeignore`. None of those block install. Adding a `.vscodeignore` is encouraged so the `.vsix` doesn't ship `node_modules/` and `tests/`.
+
+### Option B — Extension Development Host (for hacking on the extension itself)
+
+Press `F5` in VS Code. A second window opens with the extension loaded; edits to `src/` re-build via `npm run watch`.
 
 ---
 
 ## Development
 
 ```bash
-npm test            # 89 unit tests via mocha + chai + sinon
+npm test            # 159 unit + fixture tests via mocha + chai + sinon
 npx tsc -p ./       # typecheck + build to dist/
 ```
 
