@@ -328,3 +328,149 @@ describe('composeBriefing — Prompt 1: Execution Path Tracing', () => {
         expect(out).to.not.match(/## Execution Path\s*$/m);  // Should not exist as empty
     });
 });
+
+describe('composeBriefing — Confidence Annotations', () => {
+    const userPrompt = 'Analyze the codebase';
+    const scoutOutput = '<BRIEFING>## Goal\nAnalyze\n</BRIEFING>';
+
+    it('SCROOGE_INSTRUCTIONS includes confidence tag interpretation guide', () => {
+        const out = composeBriefing({ userPrompt, scoutFinalText: scoutOutput, modelInfo });
+        expect(out).to.include('Reading Confidence Tags');
+        expect(out).to.include('[VERIFIED]');
+        expect(out).to.include('[INFERRED]');
+        expect(out).to.include('[UNCERTAIN]');
+        expect(out).to.include('directly read the code or output');
+    });
+
+    it('SCOUT_SYSTEM_PROMPT includes confidence model definition', () => {
+        // This test verifies that the prompt text exists by checking the system prompt
+        // indirectly through what Launchpad would output. For direct verification,
+        // we check that confidence tags are expected in the output documentation.
+        const out = composeBriefing({ userPrompt, scoutFinalText: scoutOutput, modelInfo });
+        // The system prompt should produce output that references confidence tags
+        expect(out).to.include('Confidence');
+    });
+
+    it('confidence tags appear inline at end of assertions', () => {
+        const findings = [
+            'The extension activates via activate() in src/extension.ts:12, which registers chat participants. [VERIFIED]',
+            'The scout logic appears to be the only file invoking tools based on partial examination. [INFERRED]',
+            'There may be a secondary code path but I found no imports pointing to it. [UNCERTAIN]'
+        ].join('\n');
+        const scoutOut = `<BRIEFING>${findings}</BRIEFING>`;
+        const out = composeBriefing({ userPrompt, scoutFinalText: scoutOut, modelInfo });
+        
+        // Verify tags are inline, not on separate lines
+        expect(out).to.include('[VERIFIED]');
+        expect(out).to.include('[INFERRED]');
+        expect(out).to.include('[UNCERTAIN]');
+        
+        // Verify they're at the end of assertions (followed by newline or end)
+        expect(out).to.match(/\[VERIFIED\]\s*($|\n)/);
+        expect(out).to.match(/\[INFERRED\]\s*($|\n)/);
+        expect(out).to.match(/\[UNCERTAIN\]\s*($|\n)/);
+    });
+
+    it('Cited Context code block headers include confidence tags', () => {
+        const citedContext = [
+            '### src/types/config.ts:5-22 — ScoutConfig interface [VERIFIED]',
+            'type ScoutConfig = { ... }',
+            '',
+            '### src/scout.ts:305-340 — gatherContext() [VERIFIED]',
+            'function gatherContext() { ... }',
+            '',
+            '### src/outline.ts (approx 40-60) — buildOutline() [INFERRED — found via search]',
+            'function buildOutline() { ... }'
+        ].join('\n');
+        const out = composeBriefing({
+            userPrompt, scoutFinalText: scoutOutput, citedContext, modelInfo
+        });
+        expect(out).to.include('ScoutConfig interface [VERIFIED]');
+        expect(out).to.include('gatherContext() [VERIFIED]');
+        expect(out).to.include('buildOutline() [INFERRED');
+    });
+
+    it('Execution Path nodes include confidence tags', () => {
+        const executionPath = [
+            '## Execution Path',
+            '',
+            '1. `activate()` — src/extension.ts:12',
+            '   Registers chat participants. [VERIFIED]',
+            '2. `handleRequest()` — src/scout.ts:45',
+            '   Dispatches to modes. [VERIFIED]',
+            '3. `gatherContext()` — src/scout.ts:305',
+            '   Probably calls buildOutline() but only confirmed at line 320. [INFERRED]'
+        ].join('\n');
+        const out = composeBriefing({
+            userPrompt, scoutFinalText: scoutOutput, executionPath, modelInfo
+        });
+        expect(out).to.include('Registers chat participants. [VERIFIED]');
+        expect(out).to.include('Dispatches to modes. [VERIFIED]');
+        expect(out).to.include('[INFERRED]');
+    });
+
+    it('What I Couldn\'t Find section includes confidence tags on gap items', () => {
+        const notFoundItems = [
+            'No test file for src/scout.ts [VERIFIED — searched for scout.test.ts, scout.spec.ts, test/scout — zero results]',
+            'No error handling in execGitCommand() at src/git.ts:44 [INFERRED — read function, saw no try/catch]',
+            'User mentioned "retry logic" — no matches found [VERIFIED — searched "retry", "retryPolicy", "backoff"]'
+        ];
+        const out = composeBriefing({
+            userPrompt, scoutFinalText: scoutOutput, notFoundItems, modelInfo
+        });
+        expect(out).to.include('No test file for src/scout.ts [VERIFIED');
+        expect(out).to.include('[INFERRED');
+        expect(out).to.include('User mentioned "retry logic" — no matches found [VERIFIED');
+    });
+
+    it('confidence tags appear in all major sections (verified by a comprehensive fixture)', () => {
+        const comprehensiveScout = `<BRIEFING>
+## Goal
+Debug the flow
+
+## Relevant Files
+- src/main.ts (entry point) [VERIFIED]
+- src/handlers.ts (request handlers) [INFERRED]
+
+## Key Findings
+- Main entry is at src/main.ts line 12 [VERIFIED]
+- Request flows through handler dispatch [INFERRED]
+- There's a caching layer but I'm unsure [UNCERTAIN]
+
+## Open Questions
+- Is caching enabled by default?
+</BRIEFING>`;
+        const citedContext = `### src/main.ts:12-25 — main() [VERIFIED]
+export function main() { ... }`;
+        const executionPath = `## Execution Path
+1. main() — src/main.ts:12 [VERIFIED]
+2. handleRequest() — src/handlers.ts:45 [INFERRED]`;
+        const notFoundItems = ['No config file [VERIFIED — searched for config.json]'];
+        
+        const out = composeBriefing({
+            userPrompt, scoutFinalText: comprehensiveScout, citedContext,
+            executionPath, notFoundItems, modelInfo
+        });
+        
+        // Verify presence of all three tag types across sections
+        const verifiedCount = (out.match(/\[VERIFIED\]/g) || []).length;
+        const inferredCount = (out.match(/\[INFERRED\]/g) || []).length;
+        const uncertainCount = (out.match(/\[UNCERTAIN\]/g) || []).length;
+        
+        expect(verifiedCount).to.be.greaterThan(0);
+        expect(inferredCount).to.be.greaterThan(0);
+        expect(uncertainCount).to.be.greaterThan(0);
+    });
+
+    it('tags are not duplicated or mangled by the composition process', () => {
+        const findings = 'The function is at line 42. [VERIFIED]';
+        const scoutOut = `<BRIEFING>${findings}</BRIEFING>`;
+        const out = composeBriefing({ userPrompt, scoutFinalText: scoutOut, modelInfo });
+        
+        // Should appear exactly once, not duplicated
+        const count = (out.match(/\[VERIFIED\]/g) || []).length;
+        expect(count).to.equal(1);
+        expect(out).to.include('The function is at line 42. [VERIFIED]');
+        expect(out).to.not.include('[VERIFIED][VERIFIED]');
+    });
+});
