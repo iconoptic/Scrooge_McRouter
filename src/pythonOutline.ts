@@ -26,6 +26,86 @@ interface Signature {
 }
 
 /**
+ * For each line, return whether the line *starts* inside an open triple-quoted
+ * string literal. This lets us suppress false-positive `def` / `class` /
+ * `import` matches inside module docstrings or string-embedded example code.
+ *
+ * The scanner walks each line character-by-character so it correctly skips
+ * over single-line `'...'` / `"..."` strings (which may contain `#` or
+ * triple-quote prefixes) and over `#` comments.
+ */
+export function scanTripleStringLines(lines: string[]): boolean[] {
+    const inside = new Array<boolean>(lines.length).fill(false);
+    let openQuote: '"""' | "'''" | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (openQuote) {
+            inside[i] = true;
+        }
+        let pos = 0;
+        while (pos < line.length) {
+            if (openQuote) {
+                const idx = line.indexOf(openQuote, pos);
+                if (idx === -1) {
+                    break;
+                }
+                pos = idx + 3;
+                openQuote = null;
+            } else {
+                // Find the next triple-opener while skipping single-line
+                // strings and `#` comments.
+                let p = pos;
+                let inSingle = false;
+                let singleChar = '';
+                let foundOpen = -1;
+                let foundKind: '"""' | "'''" | null = null;
+                while (p < line.length) {
+                    const c = line[p];
+                    if (inSingle) {
+                        if (c === '\\') {
+                            p += 2;
+                            continue;
+                        }
+                        if (c === singleChar) {
+                            inSingle = false;
+                        }
+                        p++;
+                        continue;
+                    }
+                    if (c === '#') {
+                        break;
+                    }
+                    if (line.startsWith('"""', p)) {
+                        foundOpen = p;
+                        foundKind = '"""';
+                        break;
+                    }
+                    if (line.startsWith("'''", p)) {
+                        foundOpen = p;
+                        foundKind = "'''";
+                        break;
+                    }
+                    if (c === '"' || c === "'") {
+                        inSingle = true;
+                        singleChar = c;
+                        p++;
+                        continue;
+                    }
+                    p++;
+                }
+                if (foundOpen === -1) {
+                    break;
+                }
+                openQuote = foundKind!;
+                pos = foundOpen + 3;
+            }
+        }
+    }
+    return inside;
+}
+
+/**
  * Pure function: extract structural outline from raw Python source text.
  */
 export function outlinePythonText(source: string): {
@@ -33,14 +113,19 @@ export function outlinePythonText(source: string): {
     signatures: Signature[];
 } {
     const lines = source.split(/\r?\n/);
+    const insideString = scanTripleStringLines(lines);
     const imports: string[] = [];
     const signatures: Signature[] = [];
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
+        if (insideString[i]) {
+            continue;
+        }
+
         const importMatch = line.match(IMPORT_RX);
-        if (importMatch && line.indexOf('"') === -1 && line.indexOf("'") === -1) {
+        if (importMatch) {
             imports.push(importMatch[1].trim());
             continue;
         }
